@@ -1,0 +1,674 @@
+{
+	"info": {
+		"_postman_id": "b5b48866-e16e-4d89-9cf2-308aaa01eed1",
+		"name": "Shopkeeper Billing System (Multi-Item Sale)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "15544557"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register Shop",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ownerName\": \"Saurav\",\n  \"shopName\": \"Saurav Kirana\",\n  \"mobile\": \"9876543210\",\n  \"password\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"mobile\": \"9876543210\",\n  \"password\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/refresh",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Category",
+			"item": [
+				{
+					"name": "Create Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzaG9wSWQiOjEsInVzZXJJZCI6MSwiaWF0IjoxNzcwMTkxMDk5LCJleHAiOjE3NzAyNzc0OTl9.IOohRzDalE-ARoBtvfazVm-ElkoNaj7hfTo4Q6v6Vjc",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"name\": \"Biscuit\" }"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/category",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"category"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Categories",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzaG9wSWQiOjEsInVzZXJJZCI6MSwiaWF0IjoxNzcwMTkxMDk5LCJleHAiOjE3NzAyNzc0OTl9.IOohRzDalE-ARoBtvfazVm-ElkoNaj7hfTo4Q6v6Vjc",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/category",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"category"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Product",
+			"item": [
+				{
+					"name": "Create Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzaG9wSWQiOjEsInVzZXJJZCI6MSwiaWF0IjoxNzcwMTg4OTg5LCJleHAiOjE3NzAyNzUzODl9.2_0oojb0U3mQf5ERwqOdZZzcCs85sgJMrczSnjD1lvg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Parle-G 50gm\",\n  \"categoryId\": 1,\n  \"unit\": \"PCS\",\n  \"baseUnit\": \"PCS\",\n  \"conversion\": 1,\n  \"openingCostPrice\": 6.0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/product",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Products",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/product",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"product"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Supplier",
+			"item": [
+				{
+					"name": "Create Supplier",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzaG9wSWQiOjEsInVzZXJJZCI6MSwiaWF0IjoxNzcwMTg4OTg5LCJleHAiOjE3NzAyNzUzODl9.2_0oojb0U3mQf5ERwqOdZZzcCs85sgJMrczSnjD1lvg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"Raushan\",\r\n    \"phone\":\"8989898989\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/supplier",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"supplier"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Purchase",
+			"item": [
+				{
+					"name": "Create Purchase Entry",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzaG9wSWQiOjEsInVzZXJJZCI6MSwiaWF0IjoxNzcwMTg4OTg5LCJleHAiOjE3NzAyNzUzODl9.2_0oojb0U3mQf5ERwqOdZZzcCs85sgJMrczSnjD1lvg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": 1,\n  \"quantity\": 24,\n  \"unit\": \"PCS\",\n  \"costPrice\": 6.0,\n  \"supplierId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/purchase",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"purchase"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Purchases",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/purchase",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"purchase"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sale",
+			"item": [
+				{
+					"name": "Create Multi-Item Sale",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzaG9wSWQiOjEsInVzZXJJZCI6MSwiaWF0IjoxNzcwMTg4OTg5LCJleHAiOjE3NzAyNzUzODl9.2_0oojb0U3mQf5ERwqOdZZzcCs85sgJMrczSnjD1lvg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerId\": 1,\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 2,\n      \"unit\": \"PCS\",\n      \"sellingPrice\": 10\n    }\n  ],\n  \"cashPaid\": 20,\n  \"upiPaid\": 0,\n  \"udharAmount\": 0,\n  \"roundOff\": 0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/sale",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"sale"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sale By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/sale/{{saleId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"sale",
+								"{{saleId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Stock",
+			"item": [
+				{
+					"name": "Get All Stock",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/stock",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"stock"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Khata (Customer Ledger)",
+			"item": [
+				{
+					"name": "Record Khata Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"amount\": 100,\r\n    \"note\": \"Paid via cash\"\r\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/customer/{{customerId}}/payment",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customer",
+								"{{customerId}}",
+								"payment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pending Khata Summary",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/khata/pending",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"khata",
+								"pending"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Daily Closing",
+			"item": [
+				{
+					"name": "Perform Daily Closing",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiT1dORVIiLCJzaG9wSWQiOjEsInVzZXJJZCI6MSwiaWF0IjoxNzcwMTkxMDk5LCJleHAiOjE3NzAyNzc0OTl9.IOohRzDalE-ARoBtvfazVm-ElkoNaj7hfTo4Q6v6Vjc",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/closing",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"closing"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Daily Closings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/closing",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"closing"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Today Summary",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/today",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"dashboard",
+								"today"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reports",
+			"item": [
+				{
+					"name": "Sales Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/report/sales?from=2026-02-01&to=2026-02-02",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"report",
+								"sales"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "2026-02-01"
+								},
+								{
+									"key": "to",
+									"value": "2026-02-02"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stock Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/report/stock",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"report",
+								"stock"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Khata Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/report/khata",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"report",
+								"khata"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
