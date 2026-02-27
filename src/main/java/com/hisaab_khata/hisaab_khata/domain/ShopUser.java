@@ -4,6 +4,8 @@ import com.hisaab_khata.hisaab_khata.enums.UserRole;
 import com.hisaab_khata.hisaab_khata.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 
@@ -34,11 +36,13 @@ public class ShopUser {
     private AppUser appUser;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "role", nullable = false, columnDefinition = "user_role")
     private UserRole role;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "status", nullable = false, columnDefinition = "user_status")
     private UserStatus status;
 
     @Column(name = "created_at", nullable = false, updatable = false)
