@@ -20,9 +20,9 @@ def main():
         f"{BASE}/auth/register",
         json={
             "name": "Phase1 Owner",
-            "phone": "9876543210",
-            "password": "secret123",
-            "shopName": "Phase1 Shop",
+            "phone": "9876543211",
+            "password": "secret124",
+            "shopName": "Phase2 Shop",
             "city": "Mumbai"
         },
         timeout=10
@@ -42,7 +42,7 @@ def main():
     # 3) Login: phone, password
     login = requests.post(
         f"{BASE}/auth/login",
-        json={"phone": "9876543210", "password": "secret123"},
+        json={"phone": "9876543211", "password": "secret124"},
         timeout=10
     )
     if login.status_code != 200:
