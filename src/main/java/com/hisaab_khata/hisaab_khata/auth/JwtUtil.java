@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.util.*;
 
 
@@ -22,7 +22,7 @@ public class JwtUtil {
     @Value("${security.jwt.expiry}")
     private long expiryMs;
 
-    private Key key;
+    private SecretKey key;
 
     @PostConstruct
     public void init() {
@@ -37,20 +37,20 @@ public class JwtUtil {
         claims.put("role", principal.getRole().name());
 
         return Jwts.builder()
-                .setSubject(principal.getMobile())
-                .setClaims(claims)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expiryMs))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .subject(principal.getMobile())
+                .claims(claims)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expiryMs))
+                .signWith(key)
                 .compact();
     }
 
     public Claims extractClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
+        return (Claims) Jwts.parser()
+                .verifyWith(key)
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public boolean isTokenValid(String token) {
