@@ -39,7 +39,7 @@ It helps maintain suppliers, items, purchases, sales, units, staff management, a
 - **Spring Boot 3+**
 - **Spring Security 6**
 - **Spring Data JPA**
-- **MySQL** / H2
+- **PostgreSQL**
 - **Lombok**
 - **MapStruct (optional)**
 - **Maven**
