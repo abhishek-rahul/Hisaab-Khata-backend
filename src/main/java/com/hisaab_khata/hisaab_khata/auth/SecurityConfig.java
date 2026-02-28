@@ -24,6 +24,7 @@ public class SecurityConfig {
     private final CustomAuthenticationProvider customAuthenticationProvider;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final TenantFilter tenantFilter;
+    private final ApiResponseAccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
@@ -42,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers("/shops/**", "/me").authenticated()
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(e -> e.accessDeniedHandler(accessDeniedHandler))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(tenantFilter, JwtAuthenticationFilter.class);
