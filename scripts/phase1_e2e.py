@@ -16,15 +16,15 @@ BASE_URL = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8080"
 # =========================
 SHOP_NAME = "Test Shop"
 OWNER_NAME = "Owner User"
-OWNER_MOBILE = "9876543246"
+OWNER_MOBILE = "9876543366"
 OWNER_PASSWORD = "pass123"
 
 STAFF_NAME = "Staff User"
-STAFF_MOBILE = "9876543247"
+STAFF_MOBILE = "9876543367"
 STAFF_PASSWORD = "staff123"
 
 ANOTHER_STAFF_NAME = "Another Staff"
-ANOTHER_STAFF_MOBILE = "9876543257"  # different from STAFF_MOBILE
+ANOTHER_STAFF_MOBILE = "9876543368"  # different from STAFF_MOBILE
 ANOTHER_STAFF_PASSWORD = "staff456"
 # =========================
 
