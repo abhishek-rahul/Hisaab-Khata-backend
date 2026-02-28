@@ -6,9 +6,10 @@ import lombok.*;
 @Getter @Setter @Builder
 @NoArgsConstructor @AllArgsConstructor
 public class RegisterRequest {
-    private String ownerName;
-    private String shopName;
-    private String mobile;
+    private String name;
+    private String phone;
     private String password;
+    private String shopName;
+    private String city;
 }
 
