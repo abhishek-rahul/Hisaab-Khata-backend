@@ -2,7 +2,7 @@ package com.hisaab_khata.hisaab_khata.util;
 
 
 import com.hisaab_khata.hisaab_khata.auth.ShopUserPrincipal;
-import com.hisaab_khata.hisaab_khata.domain.Shop;
+//import com.hisaab_khata.hisaab_khata.domain.Shop;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;

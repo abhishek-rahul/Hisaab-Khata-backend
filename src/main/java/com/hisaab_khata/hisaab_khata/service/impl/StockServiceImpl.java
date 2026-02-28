@@ -11,7 +11,7 @@ import com.hisaab_khata.hisaab_khata.service.IStockService;
 import com.hisaab_khata.hisaab_khata.util.ShopContext;
 import com.hisaab_khata.hisaab_khata.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

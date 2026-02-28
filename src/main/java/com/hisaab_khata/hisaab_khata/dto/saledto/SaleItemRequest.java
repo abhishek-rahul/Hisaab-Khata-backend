@@ -4,7 +4,7 @@ package com.hisaab_khata.hisaab_khata.dto.saledto;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-import java.math.BigDecimal;
+//import java.math.BigDecimal;
 
 @Getter
 @Setter

@@ -6,9 +6,9 @@ import com.hisaab_khata.hisaab_khata.domain.Supplier;
 import com.hisaab_khata.hisaab_khata.dto.supplierdto.SupplierCreateRequest;
 import com.hisaab_khata.hisaab_khata.dto.supplierdto.SupplierResponse;
 import com.hisaab_khata.hisaab_khata.exception.BusinessValidationException;
-import com.hisaab_khata.hisaab_khata.repository.PurchaseRepository;
+//import com.hisaab_khata.hisaab_khata.repository.PurchaseRepository;
 import com.hisaab_khata.hisaab_khata.repository.ShopRepository;
-import com.hisaab_khata.hisaab_khata.repository.SupplierLedgerRepository;
+//import com.hisaab_khata.hisaab_khata.repository.SupplierLedgerRepository;
 import com.hisaab_khata.hisaab_khata.repository.SupplierRepository;
 import com.hisaab_khata.hisaab_khata.service.ISupplierService;
 import com.hisaab_khata.hisaab_khata.util.ShopContext;
@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 public class SupplierServiceImpl implements ISupplierService {
 
     private final SupplierRepository supplierRepository;
-    private final SupplierLedgerRepository supplierLedgerRepository;
-    private final PurchaseRepository purchaseRepository;
+    //private final SupplierLedgerRepository supplierLedgerRepository;
+    //private final PurchaseRepository purchaseRepository;
     private final ShopContext shopContext;
     private final ShopRepository shopRepository;
 

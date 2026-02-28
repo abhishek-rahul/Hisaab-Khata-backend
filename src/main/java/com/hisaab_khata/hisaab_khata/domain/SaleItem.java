@@ -5,7 +5,7 @@ package com.hisaab_khata.hisaab_khata.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
+//import java.math.BigDecimal;
 
 @Entity
 @Table(name = "sale_item")

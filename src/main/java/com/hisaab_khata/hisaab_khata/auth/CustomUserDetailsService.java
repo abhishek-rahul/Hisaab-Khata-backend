@@ -5,8 +5,8 @@ package com.hisaab_khata.hisaab_khata.auth;
 import com.hisaab_khata.hisaab_khata.domain.User;
 import com.hisaab_khata.hisaab_khata.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 
 import org.springframework.security.core.userdetails.UserDetails;

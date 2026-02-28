@@ -1,7 +1,7 @@
 package com.hisaab_khata.hisaab_khata.mapper;
 
 
-import com.hisaab_khata.hisaab_khata.domain.DailyClosing;
+//import com.hisaab_khata.hisaab_khata.domain.DailyClosing;
 import com.hisaab_khata.hisaab_khata.domain.Sale;
 import com.hisaab_khata.hisaab_khata.dto.reportdto.DailyProfitEntry;
 import com.hisaab_khata.hisaab_khata.mapper.config.GlobalMapperConfig;

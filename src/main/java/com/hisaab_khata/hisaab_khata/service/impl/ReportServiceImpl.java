@@ -1,12 +1,12 @@
 package com.hisaab_khata.hisaab_khata.service.impl;
 
 
-import com.hisaab_khata.hisaab_khata.domain.Customer;
+//import com.hisaab_khata.hisaab_khata.domain.Customer;
 import com.hisaab_khata.hisaab_khata.domain.CustomerLedger;
 import com.hisaab_khata.hisaab_khata.domain.Sale;
 import com.hisaab_khata.hisaab_khata.dto.khatadto.KhataReportResponse;
 import com.hisaab_khata.hisaab_khata.dto.khatadto.PendingKhataResponse;
-import com.hisaab_khata.hisaab_khata.dto.reportdto.DailyProfitEntry;
+//import com.hisaab_khata.hisaab_khata.dto.reportdto.DailyProfitEntry;
 import com.hisaab_khata.hisaab_khata.dto.reportdto.ProfitReportResponse;
 import com.hisaab_khata.hisaab_khata.dto.reportdto.SalesReportResponse;
 import com.hisaab_khata.hisaab_khata.dto.reportdto.StockReportResponse;
@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+//import java.time.LocalDateTime;
 import java.util.List;
 
 @Service

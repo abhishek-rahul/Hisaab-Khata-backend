@@ -1,8 +1,8 @@
 package com.hisaab_khata.hisaab_khata.service.impl;
 
 
-import com.hisaab_khata.hisaab_khata.domain.Category;
-import com.hisaab_khata.hisaab_khata.domain.Product;
+//import com.hisaab_khata.hisaab_khata.domain.Category;
+//import com.hisaab_khata.hisaab_khata.domain.Product;
 import com.hisaab_khata.hisaab_khata.dto.stockdto.SearchResultResponse;
 import com.hisaab_khata.hisaab_khata.repository.CategoryRepository;
 import com.hisaab_khata.hisaab_khata.repository.ProductRepository;

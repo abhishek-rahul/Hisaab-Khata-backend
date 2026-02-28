@@ -7,7 +7,7 @@ import com.hisaab_khata.hisaab_khata.dto.supplierdto.SupplierResponse;
 import com.hisaab_khata.hisaab_khata.mapper.config.GlobalMapperConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+//import org.mapstruct.MappingTarget;
 
 @Mapper(config = GlobalMapperConfig.class)
 public interface SupplierMapper {
