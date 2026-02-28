@@ -11,6 +11,23 @@ import urllib.error
 
 BASE_URL = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8080"
 
+# =========================
+# Config / Test Data (change here only)
+# =========================
+SHOP_NAME = "Test Shop"
+OWNER_NAME = "Owner User"
+OWNER_MOBILE = "9876543246"
+OWNER_PASSWORD = "pass123"
+
+STAFF_NAME = "Staff User"
+STAFF_MOBILE = "9876543247"
+STAFF_PASSWORD = "staff123"
+
+ANOTHER_STAFF_NAME = "Another Staff"
+ANOTHER_STAFF_MOBILE = "9876543257"  # different from STAFF_MOBILE
+ANOTHER_STAFF_PASSWORD = "staff456"
+# =========================
+
 
 def req(method, path, body=None, token=None):
     url = f"{BASE_URL}{path}"
@@ -23,24 +40,24 @@ def req(method, path, body=None, token=None):
         with urllib.request.urlopen(req_obj) as r:
             return r.status, json.loads(r.read().decode())
     except urllib.error.HTTPError as e:
-        body = e.read().decode()
+        raw_body = e.read().decode()
         try:
-            return e.code, json.loads(body)
+            return e.code, json.loads(raw_body)
         except json.JSONDecodeError:
-            return e.code, {"raw": body}
+            return e.code, {"raw": raw_body}
 
 
 def main():
     print("Phase 1 E2E Test")
     print("=" * 50)
 
-    # 1. Register
+    # 1. Register (Owner)
     print("\n1. POST /auth/register")
     status, resp = req("POST", "/auth/register", {
-        "shopName": "Test Shop",
-        "ownerName": "Owner User",
-        "mobile": "9876543267",
-        "password": "pass123"
+        "shopName": SHOP_NAME,
+        "ownerName": OWNER_NAME,
+        "mobile": OWNER_MOBILE,
+        "password": OWNER_PASSWORD
     })
     assert status == 201, f"Expected 201, got {status}: {resp}"
     assert resp.get("success") is True, f"Expected success: {resp}"
@@ -49,13 +66,13 @@ def main():
     user_id = data.get("userId")
     token = data.get("token")
     refresh_token = data.get("refreshToken")
-    print(f"   resfresh token ={refresh_token}")
+    print(f"   refresh token ={refresh_token}")
     assert shop_id and user_id and token and refresh_token, f"Missing fields: {data}"
     print(f"   OK: shopId={shop_id}, userId={user_id}")
 
     # 2. Login owner
     print("\n2. POST /auth/login (owner)")
-    status, resp = req("POST", "/auth/login", {"mobile": "9876543267", "password": "pass123"})
+    status, resp = req("POST", "/auth/login", {"mobile": OWNER_MOBILE, "password": OWNER_PASSWORD})
     assert status == 200, f"Expected 200, got {status}: {resp}"
     assert resp.get("success") is True
     login_data = resp.get("data", {})
@@ -68,9 +85,9 @@ def main():
     # 3. Create staff (owner)
     print("\n3. POST /shops/{shopId}/staff (owner)")
     status, resp = req("POST", f"/shops/{shop_id}/staff", {
-        "name": "Staff User",
-        "mobile": "9876543268",
-        "password": "staff123"
+        "name": STAFF_NAME,
+        "mobile": STAFF_MOBILE,
+        "password": STAFF_PASSWORD
     }, token=owner_token)
     assert status == 201, f"Expected 201, got {status}: {resp}"
     assert resp.get("success") is True
@@ -82,7 +99,7 @@ def main():
 
     # 4. Login staff
     print("\n4. POST /auth/login (staff)")
-    status, resp = req("POST", "/auth/login", {"mobile": "9876543268", "password": "staff123"})
+    status, resp = req("POST", "/auth/login", {"mobile": STAFF_MOBILE, "password": STAFF_PASSWORD})
     assert status == 200, f"Expected 200, got {status}: {resp}"
     staff_token = resp.get("data", {}).get("token")
     assert staff_token
@@ -101,18 +118,18 @@ def main():
     # 6. Staff tries to create staff -> forbidden
     print("\n6. POST /shops/{shopId}/staff (staff) -> expect 403")
     status, resp = req("POST", f"/shops/{shop_id}/staff", {
-        "name": "Another Staff",
-        "mobile": "9876543268",
-        "password": "staff456"
+        "name": ANOTHER_STAFF_NAME,
+        "mobile": ANOTHER_STAFF_MOBILE,
+        "password": ANOTHER_STAFF_PASSWORD
     }, token=staff_token)
     assert status == 403, f"Expected 403, got {status}: {resp}"
     assert resp.get("success") is False
     assert resp.get("statusCode") == "FORBIDDEN"
     print("   OK: Forbidden as expected")
 
-    # 7. Refresh token (owner's refresh token from step 1)
+    # 7. Refresh token (owner's refresh token from step 2)
     print("\n7. POST /auth/refresh (with owner's refresh token)")
-    print(f"   resfresh token ={owner_refresh_token}")
+    print(f"   refresh token ={owner_refresh_token}")
     status, resp = req("POST", "/auth/refresh", token=owner_refresh_token)
     assert status == 200, f"Expected 200, got {status}: {resp}"
     assert resp.get("success") is True
