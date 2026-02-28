@@ -1,142 +1,85 @@
 package com.hisaab_khata.hisaab_khata.exception;
 
-
-import com.hisaab_khata.hisaab_khata.dto.ErrorResponse;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.WebRequest;
+import com.hisaab_khata.hisaab_khata.dto.ApiResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
-import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private ErrorResponse buildError(
-            HttpStatus status,
-            String message,
-            String code,
-            String path
-    ) {
-        return ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(status.value())
-                .error(status.getReasonPhrase())
-                .message(message)
-                .code(code)
-                .path(path)
-                .build();
-    }
-
-    // -----------------------------
-    // RESOURCE NOT FOUND
-    // -----------------------------
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(
-            ResourceNotFoundException ex,
-            WebRequest request
-    ) {
-        ErrorResponse response = buildError(
-                HttpStatus.NOT_FOUND,
-                ex.getMessage(),
-                ex.getCode(),
-                request.getDescription(false).replace("uri=", "")
-        );
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    public ResponseEntity<ApiResponse<Void>> handleNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error("NOT_FOUND", ex.getCode(), ex.getMessage()));
     }
 
-    // -----------------------------
-    // BUSINESS VALIDATION FAILURES
-    // -----------------------------
     @ExceptionHandler(BusinessValidationException.class)
-    public ResponseEntity<ErrorResponse> handleBusinessError(
-            BusinessValidationException ex,
-            WebRequest request
-    ) {
-        ErrorResponse response = buildError(
-                HttpStatus.BAD_REQUEST,
-                ex.getMessage(),
-                ex.getCode(),
-                request.getDescription(false).replace("uri=", "")
-        );
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ApiResponse<Void>> handleBusinessError(BusinessValidationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error("VALIDATION_FAILED", ex.getCode(), ex.getMessage()));
     }
 
-    // -----------------------------
-    // UNAUTHORIZED (JWT/No Login)
-    // -----------------------------
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ErrorResponse> handleUnauthorized(
-            UnauthorizedException ex,
-            WebRequest request
-    ) {
-        ErrorResponse response = buildError(
-                HttpStatus.UNAUTHORIZED,
-                ex.getMessage(),
-                ex.getCode(),
-                request.getDescription(false).replace("uri=", "")
-        );
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<ApiResponse<Void>> handleUnauthorized(UnauthorizedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error("UNAUTHORIZED", ex.getCode(), ex.getMessage()));
     }
 
-    // -----------------------------
-    // ACCESS DENIED (Different shop)
-    // -----------------------------
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDenied(
-            AccessDeniedException ex,
-            WebRequest request
-    ) {
-        ErrorResponse response = buildError(
-                HttpStatus.FORBIDDEN,
-                ex.getMessage(),
-                ex.getCode(),
-                request.getDescription(false).replace("uri=", "")
-        );
-        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBadCredentials(BadCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error("UNAUTHORIZED", "INVALID_CREDENTIALS", "Invalid mobile or password"));
     }
 
-    // -----------------------------
-    // @Valid Validation Failures
-    // -----------------------------
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDisabled(DisabledException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error("UNAUTHORIZED", "ACCOUNT_DISABLED", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ApiResponse<Void>> handleConflict(ConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error("CONFLICT", ex.getCode(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(com.hisaab_khata.hisaab_khata.exception.AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(com.hisaab_khata.hisaab_khata.exception.AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error("FORBIDDEN", ex.getCode(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleSpringAccessDenied(
+            org.springframework.security.access.AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error("FORBIDDEN", "ACCESS_DENIED", ex.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationErrors(
-            MethodArgumentNotValidException ex,
-            WebRequest request
-    ) {
-        FieldError fieldError = ex.getBindingResult().getFieldError();
-
-        String message = (fieldError != null)
-                ? fieldError.getField() + " " + fieldError.getDefaultMessage()
-                : "Validation failed";
-
-        ErrorResponse response = buildError(
-                HttpStatus.BAD_REQUEST,
-                message,
-                "VALIDATION_FAILED",
-                request.getDescription(false).replace("uri=", "")
-        );
-
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ApiResponse<Void>> handleValidationErrors(MethodArgumentNotValidException ex) {
+        List<ApiResponse.ValidationError> errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(fe -> new ApiResponse.ValidationError(fe.getField(), fe.getDefaultMessage()))
+                .collect(Collectors.toList());
+        String message = errors.isEmpty() ? "Validation failed" : errors.get(0).getField() + " " + errors.get(0).getMessage();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error("VALIDATION_FAILED", "VALIDATION_FAILED", message, errors));
     }
 
-    // -----------------------------
-    // ANY OTHER ERROR
-    // -----------------------------
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGlobal(
-            Exception ex,
-            WebRequest request
-    ) {
-        ErrorResponse response = buildError(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                ex.getMessage(),
-                "INTERNAL_ERROR",
-                request.getDescription(false).replace("uri=", "")
-        );
-        ex.printStackTrace(); // Optional log
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ApiResponse<Void>> handleGlobal(Exception ex, WebRequest request) {
+        ex.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("INTERNAL_ERROR", "INTERNAL_ERROR", ex.getMessage()));
     }
 }
-
