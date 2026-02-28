@@ -3,8 +3,10 @@ package com.hisaab_khata.hisaab_khata.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.*;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.*;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -14,6 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 
 @Configuration
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -21,6 +24,7 @@ public class SecurityConfig {
     private final CustomAuthenticationProvider customAuthenticationProvider;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final TenantFilter tenantFilter;
+    private final ApiResponseAccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
@@ -35,9 +39,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/health").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/shops/*/staff").hasRole("OWNER")
                         .requestMatchers("/shops/**", "/me").authenticated()
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(e -> e.accessDeniedHandler(accessDeniedHandler))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(tenantFilter, JwtAuthenticationFilter.class);

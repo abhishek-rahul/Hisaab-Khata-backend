@@ -14,6 +14,7 @@ import com.hisaab_khata.hisaab_khata.dto.authdto.StaffResponse;
 import com.hisaab_khata.hisaab_khata.enums.UserRole;
 import com.hisaab_khata.hisaab_khata.enums.UserStatus;
 import com.hisaab_khata.hisaab_khata.exception.ConflictException;
+import com.hisaab_khata.hisaab_khata.exception.UnauthorizedException;
 import com.hisaab_khata.hisaab_khata.repository.ShopRepository;
 import com.hisaab_khata.hisaab_khata.repository.UserRepository;
 import com.hisaab_khata.hisaab_khata.service.IAuthService;
@@ -114,7 +115,7 @@ public class AuthServiceImpl implements IAuthService {
 
         Optional<User> optUser = userRepository.findById(ref.getUserId());
         if (optUser.isEmpty()) {
-            throw new RuntimeException("User not found");
+            throw new UnauthorizedException("User not found", "USER_NOT_FOUND");
         }
         User user = optUser.get();
 
