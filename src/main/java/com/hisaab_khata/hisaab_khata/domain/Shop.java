@@ -17,8 +17,10 @@ public class Shop extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "shop_name", nullable = false)
     private String shopName;
 
+    @Column(name = "owner_name", nullable = false)
     private String ownerName;
 
     @Column(nullable = false, unique = true)
@@ -29,7 +31,8 @@ public class Shop extends BaseEntity {
 
     private String address;
 
-    private String gstNumber;  // optional
+    @Column(name = "gst_number")
+    private String gstNumber;
 
 
 }

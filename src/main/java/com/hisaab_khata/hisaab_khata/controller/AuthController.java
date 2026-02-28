@@ -1,12 +1,13 @@
 package com.hisaab_khata.hisaab_khata.controller;
 
-import com.hisaab_khata.hisaab_khata.dto.SuccessResponse;
+import com.hisaab_khata.hisaab_khata.dto.ApiResponse;
 import com.hisaab_khata.hisaab_khata.dto.authdto.*;
+import com.hisaab_khata.hisaab_khata.exception.UnauthorizedException;
 import com.hisaab_khata.hisaab_khata.service.IAuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,52 +15,30 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
     private final IAuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<SuccessResponse<AuthResponse>> register(
-            @RequestBody @Valid RegisterRequest request
-    ) {
+    public ResponseEntity<ApiResponse<AuthResponse>> register(@RequestBody @Valid RegisterRequest request) {
         AuthResponse response = authService.register(request);
-
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(SuccessResponse.<AuthResponse>builder()
-                        .success(true)
-                        .status(HttpStatus.CREATED.value())
-                        .message("Shop registered successfully")
-                        .data(response)
-                        .build());
+                .body(ApiResponse.created("Shop registered successfully", response));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<SuccessResponse<AuthResponse>> login(
-            @RequestBody @Valid LoginRequest request
-    ) {
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody @Valid LoginRequest request) {
         AuthResponse response = authService.login(request);
-
-        return ResponseEntity.ok(
-                SuccessResponse.<AuthResponse>builder()
-                        .success(true)
-                        .status(HttpStatus.OK.value())
-                        .message("Login successful")
-                        .data(response)
-                        .build());
+        return ResponseEntity.ok(ApiResponse.ok("Login successful", response));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<SuccessResponse<AuthResponse>> refreshToken(
-            @RequestHeader("Authorization") String bearerToken
-    ) {
-        String oldToken = bearerToken.replace("Bearer ", "");
+    public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(
+            @RequestHeader(value = "Authorization", required = false) String bearerToken) {
+        if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+            throw new UnauthorizedException(
+                    "Authorization header with Bearer token required", "MISSING_REFRESH_TOKEN");
+        }
+        String oldToken = bearerToken.replace("Bearer ", "").trim();
         AuthResponse response = authService.refreshToken(oldToken);
-
-        return ResponseEntity.ok(
-                SuccessResponse.<AuthResponse>builder()
-                        .success(true)
-                        .status(HttpStatus.OK.value())
-                        .message("Token refreshed")
-                        .data(response)
-                        .build());
+        return ResponseEntity.ok(ApiResponse.ok("Token refreshed", response));
     }
 }

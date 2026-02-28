@@ -1,21 +1,27 @@
 package com.hisaab_khata.hisaab_khata.domain;
 
 
+import com.hisaab_khata.hisaab_khata.domain.support.UserRolePgType;
+import com.hisaab_khata.hisaab_khata.domain.support.UserStatusPgType;
 import com.hisaab_khata.hisaab_khata.enums.UserRole;
+import com.hisaab_khata.hisaab_khata.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = "mobile"))
 @Getter
-@Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // multi-tenancy
     @Column(name = "shop_id", nullable = false)
     private Long shopId;
 
@@ -25,12 +31,17 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String mobile;
 
-    @Column(nullable = false)
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Enumerated(EnumType.STRING)
+    @Type(UserRolePgType.class)
     private UserRole role;
 
+    @Type(UserStatusPgType.class)
+    @Builder.Default
+    private UserStatus status = UserStatus.ACTIVE;
+
+    @Builder.Default
     private Boolean active = true;
 }
 

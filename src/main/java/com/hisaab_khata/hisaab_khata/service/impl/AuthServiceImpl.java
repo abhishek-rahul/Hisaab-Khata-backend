@@ -9,15 +9,14 @@ import com.hisaab_khata.hisaab_khata.domain.User;
 import com.hisaab_khata.hisaab_khata.dto.authdto.AuthResponse;
 import com.hisaab_khata.hisaab_khata.dto.authdto.LoginRequest;
 import com.hisaab_khata.hisaab_khata.dto.authdto.RegisterRequest;
+import com.hisaab_khata.hisaab_khata.dto.authdto.StaffCreateRequest;
+import com.hisaab_khata.hisaab_khata.dto.authdto.StaffResponse;
 import com.hisaab_khata.hisaab_khata.enums.UserRole;
-import com.hisaab_khata.hisaab_khata.exception.BusinessValidationException;
-import com.hisaab_khata.hisaab_khata.exception.ResourceNotFoundException;
+import com.hisaab_khata.hisaab_khata.enums.UserStatus;
+import com.hisaab_khata.hisaab_khata.exception.ConflictException;
 import com.hisaab_khata.hisaab_khata.repository.ShopRepository;
 import com.hisaab_khata.hisaab_khata.repository.UserRepository;
 import com.hisaab_khata.hisaab_khata.service.IAuthService;
-//import io.jsonwebtoken.Claims;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,28 +25,34 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 //import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
-@RequiredArgsConstructor
 public class AuthServiceImpl implements IAuthService {
 
-    @Autowired
     private final ShopRepository shopRepository;
-
-    @Autowired
     private final UserRepository userRepository;
-
-    @Autowired
     private final JwtUtil jwtTokenProvider;
-
-    @Autowired
     private final PasswordEncoder passwordEncoder;
-
     private final AuthenticationManager authManager;
     private final RefreshTokenService refreshTokenService;
 
+    public AuthServiceImpl(ShopRepository shopRepository, UserRepository userRepository,
+                           JwtUtil jwtTokenProvider, PasswordEncoder passwordEncoder,
+                           AuthenticationManager authManager, RefreshTokenService refreshTokenService) {
+        this.shopRepository = shopRepository;
+        this.userRepository = userRepository;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.passwordEncoder = passwordEncoder;
+        this.authManager = authManager;
+        this.refreshTokenService = refreshTokenService;
+    }
+
     @Override
     public AuthResponse register(RegisterRequest req) {
-
+        if (userRepository.findByMobile(req.getMobile()).isPresent()) {
+            throw new ConflictException("Mobile already registered", "MOBILE_ALREADY_EXISTS");
+        }
         // Create shop
         Shop shop = Shop.builder()
                 .shopName(req.getShopName())
@@ -64,6 +69,7 @@ public class AuthServiceImpl implements IAuthService {
                 .passwordHash(passwordEncoder.encode(req.getPassword()))
                 .shopId(shop.getId())
                 .role(UserRole.OWNER)
+                .status(UserStatus.ACTIVE)
                 .active(true)
                 .build();
 
@@ -87,26 +93,12 @@ public class AuthServiceImpl implements IAuthService {
 
     @Override
     public AuthResponse login(LoginRequest req) {
-
         Authentication auth = authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(req.getMobile(), req.getPassword())
         );
-
-        User user = userRepository.findByMobile(req.getMobile())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found", "USER_NOT_FOUND"));
-
-        if (!passwordEncoder.matches(req.getPassword(), user.getPasswordHash())) {
-            throw new BusinessValidationException("Invalid password", "INVALID_PASSWORD");
-        }
-
-        ShopUserPrincipal principal = new ShopUserPrincipal(
-                user.getId(), user.getShopId(), user.getMobile(),
-                user.getPasswordHash(), user.getRole()
-        );
-
+        ShopUserPrincipal principal = (ShopUserPrincipal) auth.getPrincipal();
         String token = jwtTokenProvider.createToken(principal);
         RefreshToken ref = refreshTokenService.create(principal.getUserId());
-
         return AuthResponse.builder()
                 .shopId(principal.getShopId())
                 .userId(principal.getUserId())
@@ -120,8 +112,11 @@ public class AuthServiceImpl implements IAuthService {
 
         RefreshToken ref = refreshTokenService.validate(refreshToken);
 
-        User user = userRepository.findById(ref.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        Optional<User> optUser = userRepository.findById(ref.getUserId());
+        if (optUser.isEmpty()) {
+            throw new RuntimeException("User not found");
+        }
+        User user = optUser.get();
 
         ShopUserPrincipal principal = ShopUserPrincipal.builder()
                 .userId(user.getId())
@@ -138,6 +133,31 @@ public class AuthServiceImpl implements IAuthService {
                 .userId(principal.getUserId())
                 .token(newToken)
                 .refreshToken(refreshToken)
+                .build();
+    }
+
+    @Override
+    public StaffResponse createStaff(Long shopId, StaffCreateRequest request) {
+        if (userRepository.findByMobile(request.getMobile()).isPresent()) {
+            throw new ConflictException("Mobile already registered", "MOBILE_ALREADY_EXISTS");
+        }
+        User staff = User.builder()
+                .shopId(shopId)
+                .name(request.getName())
+                .mobile(request.getMobile())
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .role(UserRole.STAFF)
+                .status(UserStatus.ACTIVE)
+                .active(true)
+                .build();
+        staff = userRepository.save(staff);
+        return StaffResponse.builder()
+                .id(staff.getId())
+                .shopId(staff.getShopId())
+                .name(staff.getName())
+                .mobile(staff.getMobile())
+                .role(staff.getRole())
+                .active(staff.getActive())
                 .build();
     }
 }
