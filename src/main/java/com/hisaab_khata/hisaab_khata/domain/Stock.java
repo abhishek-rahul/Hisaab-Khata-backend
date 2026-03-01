@@ -1,9 +1,13 @@
 package com.hisaab_khata.hisaab_khata.domain;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
+/**
+ * Phase 3: Stock snapshot per shop_product. Quantity in base unit; negative allowed.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,15 +21,10 @@ public class Stock extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // MULTI-TENANCY REQUIRED
-    @Column(name = "shop_id", nullable = false)
-    private Long shopId;
-
     @OneToOne(optional = false)
-    @JoinColumn(name = "product_id")
-    private Product product;
+    @JoinColumn(name = "shop_product_id", nullable = false, unique = true)
+    private ShopProduct shopProduct;
 
-    // Always stored in BASE UNIT
-    @Column(nullable = false)
-    private Double quantity;
+    @Column(nullable = false, precision = 18, scale = 6)
+    private BigDecimal quantity;
 }

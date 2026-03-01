@@ -42,7 +42,7 @@ public class SearchServiceImpl implements ISearchService {
                                 .build()
                 ));
 
-        categoryRepo.findByShopId(shopId)
+        categoryRepo.findByShop_Id(shopId)
                 .stream()
                 .filter(c -> c.getName().toLowerCase().contains(query.toLowerCase()))
                 .forEach(c -> results.add(

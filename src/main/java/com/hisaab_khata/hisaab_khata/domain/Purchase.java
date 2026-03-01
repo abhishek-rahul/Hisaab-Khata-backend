@@ -21,9 +21,13 @@ public class Purchase extends BaseEntity {
     @JoinColumn(name = "shop_id")
     private Shop shop;
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
+
+    @ManyToOne
+    @JoinColumn(name = "shop_product_id")
+    private ShopProduct shopProduct;
 
     @ManyToOne
     @JoinColumn(name = "supplier_id")

@@ -10,8 +10,8 @@ import org.mapstruct.Mapping;
 @Mapper(config = GlobalMapperConfig.class)
 public interface DashboardMapper {
 
-    @Mapping(target = "productId", source = "product.id")
-    @Mapping(target = "productName", source = "product.name")
+    @Mapping(target = "productId", source = "shopProduct.id")
+    @Mapping(target = "productName", source = "shopProduct.displayName")
     LowStockItemResponse toLowStockItem(Stock stock);
 }
 

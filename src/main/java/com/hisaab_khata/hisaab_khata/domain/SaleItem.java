@@ -29,8 +29,12 @@ public class SaleItem extends BaseEntity {
     private Sale sale;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id")
     private Product product;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_product_id")
+    private ShopProduct shopProduct;
 
     // quantity entered by user (PCS / KG etc.)
     @Column(name = "quantity", nullable = false)
