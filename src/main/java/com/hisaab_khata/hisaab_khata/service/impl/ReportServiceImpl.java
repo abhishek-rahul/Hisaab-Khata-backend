@@ -106,11 +106,8 @@ public class ReportServiceImpl implements IReportService {
 
         Long shopId = shopContext.getCurrentShopId();
 
-        List<StockResponse> stockList = productRepo.findByShopId(shopId)
+        List<StockResponse> stockList = stockRepo.findByShopProduct_Shop_Id(shopId)
                 .stream()
-                .map(product -> stockRepo.findByProduct_Id(product.getId())
-                        .orElse(null))
-                .filter(s -> s != null)
                 .map(stockMapper::toResponse)
                 .toList();
 

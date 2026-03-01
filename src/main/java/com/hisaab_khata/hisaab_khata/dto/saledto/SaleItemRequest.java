@@ -13,8 +13,8 @@ import lombok.*;
 @NoArgsConstructor
 public class SaleItemRequest {
 
-    @NotNull(message = "productId is required")
-    private Long productId;
+    private Long productId;   // legacy
+    private Long shopProductId; // Phase 3
 
     @NotNull(message = "quantity is required")
     @DecimalMin(value = "0.001", message = "Quantity must be greater than 0")

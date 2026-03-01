@@ -40,8 +40,14 @@ public class ValidationUtil {
     }
 
     public void validateShopOwnership(Long currentShopId, Category category) {
-        if (!category.getShop().getId().equals(currentShopId)) {
-            throw new RuntimeException("Access denied for supplier");
+        if (category.getShop() != null && !category.getShop().getId().equals(currentShopId)) {
+            throw new RuntimeException("Access denied for category");
+        }
+    }
+
+    public void validateShopOwnership(Long currentShopId, com.hisaab_khata.hisaab_khata.domain.ShopProduct shopProduct) {
+        if (!shopProduct.getShop().getId().equals(currentShopId)) {
+            throw new RuntimeException("Access denied for shop product");
         }
     }
 }

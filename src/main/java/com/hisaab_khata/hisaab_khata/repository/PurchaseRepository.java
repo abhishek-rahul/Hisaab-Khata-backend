@@ -13,5 +13,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
     List<Purchase> findByShopId(Long shopId);
 
     List<Purchase> findByShopIdAndProductId(Long shopId, Long productId);
+
+    List<Purchase> findByShopIdAndShopProductId(Long shopId, Long shopProductId);
 }
 

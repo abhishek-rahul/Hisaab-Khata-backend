@@ -39,6 +39,9 @@ public class SaleServiceImpl implements ISaleService {
     private final ProductRepository productRepository;
 
     @Autowired
+    private final ShopProductRepository shopProductRepository;
+
+    @Autowired
     private final StockRepository stockRepository;
 
     @Autowired
@@ -76,20 +79,19 @@ public class SaleServiceImpl implements ISaleService {
         List<SaleItem> saleItems = new ArrayList<>();
 
         for (SaleItemRequest itemReq : req.getItems()) {
+            if (itemReq.getShopProductId() == null) {
+                throw new BusinessValidationException("Phase 3: shopProductId required in each sale item", "SHOP_PRODUCT_ID_REQUIRED");
+            }
+            ShopProduct shopProduct = shopProductRepository.findByShop_IdAndId(shopId, itemReq.getShopProductId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Shop product not found", "SHOP_PRODUCT_NOT_FOUND"));
 
-            Product product = productRepository.findById(itemReq.getProductId())
-                    .filter(p -> Objects.equals(p.getShop().getId(), shopId))
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Product not found", "PRODUCT_NOT_FOUND"));
-
-            Double qtyBase = itemReq.getQuantity() * product.getConversion();
+            Double qtyBase = itemReq.getQuantity() * shopProduct.getConversionToBase().doubleValue();
             Double totalPrice = itemReq.getSellingPrice() * itemReq.getQuantity();
-
             totalAmount += totalPrice;
 
             SaleItem si = SaleItem.builder()
                     .shopId(shopId)
-                    .product(product)
+                    .shopProduct(shopProduct)
                     .quantity(itemReq.getQuantity())
                     .quantityBase(qtyBase)
                     .unit(itemReq.getUnit())
@@ -130,14 +132,13 @@ public class SaleServiceImpl implements ISaleService {
         // Stock validation
         // -------------------
         for (SaleItem si : saleItems) {
-            Stock stock = stockRepository.findByProduct_IdAndShopId(si.getProduct().getId(), shopId)
+            Stock stock = stockRepository.findByShopProduct_Id(si.getShopProduct().getId())
                     .orElseThrow(() -> new BusinessValidationException(
-                            "Stock not found for: " + si.getProduct().getName(),
+                            "Stock not found for: " + si.getShopProduct().getDisplayName(),
                             "STOCK_NOT_FOUND"));
-
-            if (stock.getQuantity() < si.getQuantityBase()) {
+            if (stock.getQuantity().compareTo(java.math.BigDecimal.valueOf(si.getQuantityBase())) < 0) {
                 throw new BusinessValidationException(
-                        "Insufficient stock for: " + si.getProduct().getName(),
+                        "Insufficient stock for: " + si.getShopProduct().getDisplayName(),
                         "STOCK_INSUFFICIENT"
                 );
             }
@@ -149,25 +150,18 @@ public class SaleServiceImpl implements ISaleService {
         Double totalProfit = 0d;
 
         for (SaleItem si : saleItems) {
-
             Double costPrice = purchaseRepository
-                    .findByShopIdAndProductId(shopId, si.getProduct().getId())
+                    .findByShopIdAndShopProductId(shopId, si.getShopProduct().getId())
                     .stream()
-                    .map(Purchase::getCostPrice)          // must return BigDecimal
+                    .map(Purchase::getCostPrice)
                     .findFirst()
-                    .orElse(
-                            si.getProduct().getOpeningCostPrice() != null
-                                    ? si.getProduct().getOpeningCostPrice()
-                                    : 0
-                    );
+                    .orElse(0D);
 
-            Double sellingPrice = si.getSellingPrice(); // BigDecimal
-            Double quantity = si.getQuantity();         // BigDecimal
-
+            Double sellingPrice = si.getSellingPrice();
+            Double quantity = si.getQuantity();
             Double profit = (sellingPrice - costPrice) * quantity;
-
             si.setProfit(profit);
-            totalProfit = totalProfit + (profit);
+            totalProfit = totalProfit + profit;
         }
 
         // -------------------
@@ -191,11 +185,9 @@ public class SaleServiceImpl implements ISaleService {
         // Save items & update stock
         // -------------------
         for (SaleItem si : saleItems) {
-
-            Stock stock = stockRepository.findByProduct_IdAndShopId(si.getProduct().getId(), shopId)
+            Stock stock = stockRepository.findByShopProduct_Id(si.getShopProduct().getId())
                     .orElseThrow(() -> new BusinessValidationException("Stock not found", "STOCK_NOT_FOUND"));
-
-            stock.setQuantity(stock.getQuantity() - si.getQuantityBase());
+            stock.setQuantity(stock.getQuantity().subtract(java.math.BigDecimal.valueOf(si.getQuantityBase())));
             stockRepository.save(stock);
 
             si.setSale(sale);

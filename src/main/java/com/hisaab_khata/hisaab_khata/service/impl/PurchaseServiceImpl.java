@@ -91,7 +91,7 @@ public class PurchaseServiceImpl implements IPurchaseService {
                 req.getUnit(),
                 product
         );
-        stockService.increaseStock(product.getId(),  qtyInBaseUnit, shopId);
+        stockService.increaseStockLegacy(product.getId(), qtyInBaseUnit, shopId);
 
         // LEDGER ENTRY FOR CREDIT PURCHASE
         if ("CREDIT".equalsIgnoreCase(req.getPaymentMode()) && supplier != null) {
