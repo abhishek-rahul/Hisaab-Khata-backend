@@ -15,14 +15,14 @@ BASE_URL = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8080"
 # Config / Test Data
 SHOP_NAME = "Phase2 Test Shop"
 OWNER_NAME = "Phase2 Owner"
-OWNER_MOBILE = "9876543401"
+OWNER_MOBILE = "9876548401"
 OWNER_PASSWORD = "pass123"
 
 CUSTOMER_NAME = "Test Customer"
-CUSTOMER_PHONE = "9876543402"
+CUSTOMER_PHONE = "9876549402"
 
 SUPPLIER_NAME = "Test Supplier"
-SUPPLIER_PHONE = "9876543403"
+SUPPLIER_PHONE = "9876549403"
 
 
 def req(method, path, body=None, token=None):

@@ -1,6 +1,6 @@
 package com.hisaab_khata.hisaab_khata.controller;
 
-import com.hisaab_khata.hisaab_khata.dto.SuccessResponse;
+import com.hisaab_khata.hisaab_khata.dto.ApiResponse;
 import com.hisaab_khata.hisaab_khata.dto.partydto.CreatePartyRequest;
 import com.hisaab_khata.hisaab_khata.dto.partydto.PartyLedgerResponse;
 import com.hisaab_khata.hisaab_khata.dto.partydto.PartyResponse;
@@ -22,47 +22,28 @@ public class PartyController {
     private final IPartyService partyService;
 
     @PostMapping
-    public ResponseEntity<SuccessResponse<PartyResponse>> create(@Valid @RequestBody CreatePartyRequest request) {
+    public ResponseEntity<ApiResponse<PartyResponse>> create(@Valid @RequestBody CreatePartyRequest request) {
         PartyResponse res = partyService.createParty(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                SuccessResponse.<PartyResponse>builder()
-                        .success(true)
-                        .data(res)
-                        .build()
-        );
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created("Party created successfully", res));
     }
 
     @GetMapping
-    public ResponseEntity<SuccessResponse<List<PartyResponse>>> list(
+    public ResponseEntity<ApiResponse<List<PartyResponse>>> list(
             @RequestParam(required = false) PartyType type) {
         List<PartyResponse> res = partyService.listParties(type);
-        return ResponseEntity.ok(
-                SuccessResponse.<List<PartyResponse>>builder()
-                        .success(true)
-                        .data(res)
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.ok("OK", res));
     }
 
     @GetMapping("/{partyId}")
-    public ResponseEntity<SuccessResponse<PartyResponse>> get(@PathVariable Long partyId) {
+    public ResponseEntity<ApiResponse<PartyResponse>> get(@PathVariable Long partyId) {
         PartyResponse res = partyService.getParty(partyId);
-        return ResponseEntity.ok(
-                SuccessResponse.<PartyResponse>builder()
-                        .success(true)
-                        .data(res)
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.ok("OK", res));
     }
 
     @GetMapping("/{partyId}/ledger")
-    public ResponseEntity<SuccessResponse<PartyLedgerResponse>> ledger(@PathVariable Long partyId) {
+    public ResponseEntity<ApiResponse<PartyLedgerResponse>> ledger(@PathVariable Long partyId) {
         PartyLedgerResponse res = partyService.getPartyLedger(partyId);
-        return ResponseEntity.ok(
-                SuccessResponse.<PartyLedgerResponse>builder()
-                        .success(true)
-                        .data(res)
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.ok("OK", res));
     }
 }
