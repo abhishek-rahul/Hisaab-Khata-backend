@@ -1,0 +1,48 @@
+package com.hisaab_khata.hisaab_khata.domain;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.math.BigDecimal;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "purchase_upload_line")
+public class PurchaseUploadLine extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "purchase_upload_id", nullable = false)
+    private PurchaseUpload purchaseUpload;
+
+    @Column(name = "line_no", nullable = false)
+    private Integer lineNo;
+
+    @Column(name = "raw_name", nullable = false)
+    private String rawName;
+
+    @Column(name = "normalized_name", nullable = false)
+    private String normalizedName;
+
+    @Column(name = "quantity", nullable = false, precision = 18, scale = 6)
+    private BigDecimal quantity;
+
+    @Column(name = "unit", nullable = false)
+    private String unit;
+
+    @Column(name = "unit_price", nullable = false, precision = 18, scale = 2)
+    private BigDecimal unitPrice;
+
+    @Column(name = "line_amount", nullable = false, precision = 18, scale = 2)
+    private BigDecimal lineAmount;
+
+    @Column(name = "parse_confidence", precision = 5, scale = 4)
+    private BigDecimal parseConfidence;
+}
