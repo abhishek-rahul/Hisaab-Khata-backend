@@ -7,6 +7,9 @@ import com.hisaab_khata.hisaab_khata.domain.Sale;
 import com.hisaab_khata.hisaab_khata.dto.khatadto.KhataReportResponse;
 import com.hisaab_khata.hisaab_khata.dto.khatadto.PendingKhataResponse;
 //import com.hisaab_khata.hisaab_khata.dto.reportdto.DailyProfitEntry;
+import com.hisaab_khata.hisaab_khata.domain.DailySummary;
+import com.hisaab_khata.hisaab_khata.dto.reportdto.DailyReportResponse;
+import com.hisaab_khata.hisaab_khata.dto.reportdto.DailyRangeReportResponse;
 import com.hisaab_khata.hisaab_khata.dto.reportdto.ProfitReportResponse;
 import com.hisaab_khata.hisaab_khata.dto.reportdto.SalesReportResponse;
 import com.hisaab_khata.hisaab_khata.dto.reportdto.StockReportResponse;
@@ -21,8 +24,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-//import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -43,6 +46,9 @@ public class ReportServiceImpl implements IReportService {
 
     @Autowired
     private final CustomerLedgerRepository ledgerRepo;
+
+    @Autowired
+    private final DailySummaryRepository dailySummaryRepository;
 
     private final ReportMapper mapper;
     private final StockMapper stockMapper;
@@ -152,6 +158,70 @@ public class ReportServiceImpl implements IReportService {
         return KhataReportResponse.builder()
                 .pendingKhata(pending)
                 .build();
+    }
+
+    @Override
+    public DailyReportResponse getDailyReport(LocalDate date) {
+        Long shopId = shopContext.getCurrentShopId();
+        return dailySummaryRepository.findByShop_IdAndDay(shopId, date)
+                .map(this::toDailyReportResponse)
+                .orElseGet(() -> DailyReportResponse.builder()
+                        .date(date)
+                        .totalSales(BigDecimal.ZERO)
+                        .totalPurchase(BigDecimal.ZERO)
+                        .cashIn(BigDecimal.ZERO)
+                        .cashOut(BigDecimal.ZERO)
+                        .receivable(BigDecimal.ZERO)
+                        .payable(BigDecimal.ZERO)
+                        .build());
+    }
+
+    @Override
+    public DailyRangeReportResponse getDailyRangeReport(LocalDate from, LocalDate to) {
+        Long shopId = shopContext.getCurrentShopId();
+        List<DailySummary> summaries = dailySummaryRepository.findByShop_IdAndDayBetweenOrderByDayAsc(shopId, from, to);
+        List<DailyReportResponse> days = summaries.stream().map(this::toDailyReportResponse).toList();
+        BigDecimal totalSalesSum = BigDecimal.ZERO;
+        BigDecimal totalPurchaseSum = BigDecimal.ZERO;
+        BigDecimal cashInSum = BigDecimal.ZERO;
+        BigDecimal cashOutSum = BigDecimal.ZERO;
+        BigDecimal receivableSum = BigDecimal.ZERO;
+        BigDecimal payableSum = BigDecimal.ZERO;
+        for (DailySummary s : summaries) {
+            totalSalesSum = totalSalesSum.add(nullSafe(s.getTotalSales()));
+            totalPurchaseSum = totalPurchaseSum.add(nullSafe(s.getTotalPurchase()));
+            cashInSum = cashInSum.add(nullSafe(s.getCashIn()));
+            cashOutSum = cashOutSum.add(nullSafe(s.getCashOut()));
+            receivableSum = receivableSum.add(nullSafe(s.getReceivable()));
+            payableSum = payableSum.add(nullSafe(s.getPayable()));
+        }
+        return DailyRangeReportResponse.builder()
+                .from(from)
+                .to(to)
+                .days(days)
+                .totalSalesSum(totalSalesSum)
+                .totalPurchaseSum(totalPurchaseSum)
+                .cashInSum(cashInSum)
+                .cashOutSum(cashOutSum)
+                .receivableSum(receivableSum)
+                .payableSum(payableSum)
+                .build();
+    }
+
+    private DailyReportResponse toDailyReportResponse(DailySummary s) {
+        return DailyReportResponse.builder()
+                .date(s.getDay())
+                .totalSales(nullSafe(s.getTotalSales()))
+                .totalPurchase(nullSafe(s.getTotalPurchase()))
+                .cashIn(nullSafe(s.getCashIn()))
+                .cashOut(nullSafe(s.getCashOut()))
+                .receivable(nullSafe(s.getReceivable()))
+                .payable(nullSafe(s.getPayable()))
+                .build();
+    }
+
+    private static BigDecimal nullSafe(BigDecimal v) {
+        return v != null ? v : BigDecimal.ZERO;
     }
 }
 

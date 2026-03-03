@@ -36,6 +36,15 @@ public class DailySummary {
     @Column(name = "receivable", nullable = false, precision = 18, scale = 2)
     private BigDecimal receivable;
 
+    @Column(name = "total_purchase", nullable = false, precision = 18, scale = 2)
+    private BigDecimal totalPurchase;
+
+    @Column(name = "cash_out", nullable = false, precision = 18, scale = 2)
+    private BigDecimal cashOut;
+
+    @Column(name = "payable", nullable = false, precision = 18, scale = 2)
+    private BigDecimal payable;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
