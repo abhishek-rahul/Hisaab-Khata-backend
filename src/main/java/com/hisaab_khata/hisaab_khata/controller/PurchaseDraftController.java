@@ -4,9 +4,11 @@ import com.hisaab_khata.hisaab_khata.dto.ApiResponse;
 import com.hisaab_khata.hisaab_khata.dto.purchasedraft.CreateDraftRequest;
 import com.hisaab_khata.hisaab_khata.dto.purchasedraft.DraftResponse;
 import com.hisaab_khata.hisaab_khata.dto.purchasedraft.DraftReviewResponse;
+import com.hisaab_khata.hisaab_khata.dto.purchasedraft.PostedInvoiceSummary;
 import com.hisaab_khata.hisaab_khata.dto.purchasedraft.ResolveLineRequest;
 import com.hisaab_khata.hisaab_khata.dto.purchasedraft.SaveDraftRequest;
 import com.hisaab_khata.hisaab_khata.service.IPurchaseDraftService;
+import com.hisaab_khata.hisaab_khata.service.IPurchasePostService;
 import com.hisaab_khata.hisaab_khata.service.IPurchaseResolveService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ public class PurchaseDraftController {
 
     private final IPurchaseDraftService purchaseDraftService;
     private final IPurchaseResolveService purchaseResolveService;
+    private final IPurchasePostService purchasePostService;
 
     @PostMapping("/drafts")
     public ResponseEntity<ApiResponse<DraftResponse>> createDraft(@RequestBody @Valid CreateDraftRequest request) {
@@ -62,5 +65,11 @@ public class PurchaseDraftController {
             @RequestBody @Valid ResolveLineRequest request) {
         DraftReviewResponse response = purchaseResolveService.resolveLine(draftId, lineId, request);
         return ResponseEntity.ok(ApiResponse.ok("Line resolved", response));
+    }
+
+    @PostMapping("/drafts/{draftId}/post")
+    public ResponseEntity<ApiResponse<PostedInvoiceSummary>> postDraft(@PathVariable Long draftId) {
+        PostedInvoiceSummary response = purchasePostService.postDraft(draftId);
+        return ResponseEntity.ok(ApiResponse.ok("Invoice posted", response));
     }
 }
