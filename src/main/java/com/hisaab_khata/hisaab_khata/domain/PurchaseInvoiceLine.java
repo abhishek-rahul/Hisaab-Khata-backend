@@ -53,4 +53,11 @@ public class PurchaseInvoiceLine extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "shop_product_id")
     private ShopProduct shopProduct;
+
+    @ManyToOne
+    @JoinColumn(name = "suggested_master_product_id")
+    private MasterProduct suggestedMasterProduct;
+
+    @Column(name = "suggested_confidence", precision = 5, scale = 4)
+    private BigDecimal suggestedConfidence;
 }
