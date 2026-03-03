@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -29,6 +30,7 @@ public class PurchasePostServiceImpl implements IPurchasePostService {
     private final ShopProductRepository shopProductRepository;
     private final StockRepository stockRepository;
     private final PartyLedgerRepository partyLedgerRepository;
+    private final DailySummaryRepository dailySummaryRepository;
     private final ShopContext shopContext;
 
     @Override
@@ -94,6 +96,23 @@ public class PurchasePostServiceImpl implements IPurchasePostService {
                 .createdAt(LocalDateTime.now())
                 .build();
         partyLedgerRepository.save(ledgerEntry);
+
+        // Upsert daily_summary (total_purchase, payable; cashOut += 0 for now)
+        LocalDate day = invoice.getInvoiceDate() != null ? invoice.getInvoiceDate() : LocalDate.now();
+        DailySummary summary = dailySummaryRepository.findByShop_IdAndDay(shopId, day)
+                .orElseGet(() -> DailySummary.builder()
+                        .shop(invoice.getShop())
+                        .day(day)
+                        .totalSales(BigDecimal.ZERO)
+                        .cashIn(BigDecimal.ZERO)
+                        .receivable(BigDecimal.ZERO)
+                        .totalPurchase(BigDecimal.ZERO)
+                        .cashOut(BigDecimal.ZERO)
+                        .payable(BigDecimal.ZERO)
+                        .build());
+        summary.setTotalPurchase(summary.getTotalPurchase() != null ? summary.getTotalPurchase().add(total) : total);
+        summary.setPayable(summary.getPayable() != null ? summary.getPayable().add(total) : total);
+        dailySummaryRepository.save(summary);
 
         // Update invoice to POSTED
         invoice.setStatus(DocStatus.POSTED);

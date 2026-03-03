@@ -240,6 +240,9 @@ public class SalesServiceImpl implements ISalesService {
                         .totalSales(BigDecimal.ZERO)
                         .cashIn(BigDecimal.ZERO)
                         .receivable(BigDecimal.ZERO)
+                        .totalPurchase(BigDecimal.ZERO)
+                        .cashOut(BigDecimal.ZERO)
+                        .payable(BigDecimal.ZERO)
                         .build());
         summary.setTotalSales(summary.getTotalSales().add(totalAmount));
         summary.setCashIn(summary.getCashIn().add(paidAmount));

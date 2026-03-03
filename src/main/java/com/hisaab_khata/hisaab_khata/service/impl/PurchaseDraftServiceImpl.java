@@ -143,9 +143,9 @@ public class PurchaseDraftServiceImpl implements IPurchaseDraftService {
             draft.setSupplierParty(null);
         }
 
-        draft.getLines().clear();
-        BigDecimal total = BigDecimal.ZERO;
         if (request.getLines() != null) {
+            draft.getLines().clear();
+            BigDecimal total = BigDecimal.ZERO;
             for (SaveDraftLineRequest lineReq : request.getLines()) {
                 String normalizedName = normalizer.normalize(lineReq.getRawName());
                 BigDecimal lineAmount = lineReq.getLineAmount() != null
@@ -167,8 +167,8 @@ public class PurchaseDraftServiceImpl implements IPurchaseDraftService {
                 draft.getLines().add(line);
                 total = total.add(lineAmount);
             }
+            draft.setTotalAmount(total);
         }
-        draft.setTotalAmount(total);
         draft.setVersion(draft.getVersion() + 1);
         PurchaseInvoice saved = purchaseInvoiceRepository.save(draft);
         return toResponse(saved);
