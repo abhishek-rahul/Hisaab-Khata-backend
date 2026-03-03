@@ -3,6 +3,8 @@ package com.hisaab_khata.hisaab_khata.service.impl;
 
 import com.hisaab_khata.hisaab_khata.domain.Product;
 import com.hisaab_khata.hisaab_khata.domain.Purchase;
+import com.hisaab_khata.hisaab_khata.domain.PurchaseInvoice;
+import com.hisaab_khata.hisaab_khata.domain.PurchaseInvoiceLine;
 import com.hisaab_khata.hisaab_khata.domain.Shop;
 import com.hisaab_khata.hisaab_khata.domain.Supplier;
 import com.hisaab_khata.hisaab_khata.dto.purchasedto.PurchaseCreateRequest;
@@ -21,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -30,6 +34,9 @@ public class PurchaseServiceImpl implements IPurchaseService {
 
     @Autowired
     private final PurchaseRepository purchaseRepo;
+
+    @Autowired
+    private final PurchaseInvoiceRepository purchaseInvoiceRepo;
 
     @Autowired
     private final ProductRepository productRepo;
@@ -110,15 +117,45 @@ public class PurchaseServiceImpl implements IPurchaseService {
     public PurchaseResponse getPurchase(Long id) {
         Long shopId = shopContext.getCurrentShopId();
 
-        Purchase p = purchaseRepo.findById(id)
+        // Option A: serve from new flow (purchase_invoice) so GET /purchase/{id} works with draft-post id
+        PurchaseInvoice invoice = purchaseInvoiceRepo.findByShop_IdAndId(shopId, id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Purchase not found", "PURCHASE_NOT_FOUND"));
 
-        if (!p.getShop().getId().equals(shopId)) {
-            throw new AccessDeniedException("Purchase not in your shop", "ACCESS_DENIED");
-        }
+        return toPurchaseResponseFromInvoice(invoice);
+    }
 
-        return mapper.toResponse(p);
+    /** Maps a posted purchase invoice to legacy PurchaseResponse shape for GET /purchase/{id}. */
+    private static PurchaseResponse toPurchaseResponseFromInvoice(PurchaseInvoice invoice) {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        PurchaseResponse.PurchaseResponseBuilder b = PurchaseResponse.builder()
+                .id(invoice.getId())
+                .createdAt(invoice.getPostedAt() != null
+                        ? invoice.getPostedAt().format(fmt)
+                        : (invoice.getCreatedAt() != null ? invoice.getCreatedAt().format(fmt) : null));
+
+        if (invoice.getSupplierParty() != null) {
+            b.supplierId(invoice.getSupplierParty().getId());
+            b.supplierName(invoice.getSupplierParty().getName());
+        }
+        b.paymentMode("CASH");
+
+        List<PurchaseInvoiceLine> lines = invoice.getLines() != null
+                ? invoice.getLines().stream().sorted(Comparator.comparing(PurchaseInvoiceLine::getLineNo)).toList()
+                : List.of();
+        if (!lines.isEmpty()) {
+            PurchaseInvoiceLine first = lines.get(0);
+            b.quantity(first.getQuantity() != null ? first.getQuantity().doubleValue() : null);
+            b.unit(first.getUnit());
+            b.costPrice(first.getUnitPrice() != null ? first.getUnitPrice().doubleValue() : null);
+            if (first.getShopProduct() != null) {
+                b.productId(first.getShopProduct().getId());
+                b.productName(first.getShopProduct().getDisplayName() != null ? first.getShopProduct().getDisplayName() : first.getRawName());
+            } else {
+                b.productName(first.getRawName());
+            }
+        }
+        return b.build();
     }
 
     @Override
