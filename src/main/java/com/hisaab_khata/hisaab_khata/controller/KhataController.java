@@ -3,7 +3,7 @@ package com.hisaab_khata.hisaab_khata.controller;
 
 import com.hisaab_khata.hisaab_khata.dto.SuccessResponse;
 import com.hisaab_khata.hisaab_khata.dto.khatadto.PendingKhataResponse;
-import com.hisaab_khata.hisaab_khata.service.ICustomerService;
+import com.hisaab_khata.hisaab_khata.service.IReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -17,11 +17,11 @@ import java.util.List;
 public class KhataController {
 
     @Autowired
-    private final ICustomerService customerService;
+    private final IReportService reportService;
 
     @GetMapping("/pending")
     public ResponseEntity<SuccessResponse<List<PendingKhataResponse>>> pending() {
-        List<PendingKhataResponse> res = customerService.getPendingKhataSummary();
+        List<PendingKhataResponse> res = reportService.getPendingKhataSummary();
         return ResponseEntity.ok(
                 SuccessResponse.<List<PendingKhataResponse>>builder()
                         .success(true)

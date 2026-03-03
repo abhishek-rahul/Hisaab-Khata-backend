@@ -39,9 +39,6 @@ public class ReportServiceImpl implements IReportService {
     private final StockRepository stockRepo;
 
     @Autowired
-    private final ProductRepository productRepo;
-
-    @Autowired
     private final CustomerRepository customerRepo;
 
     @Autowired
@@ -123,11 +120,21 @@ public class ReportServiceImpl implements IReportService {
     }
 
     @Override
+    public List<PendingKhataResponse> getPendingKhataSummary() {
+        return buildPendingKhataList(shopContext.getCurrentShopId());
+    }
+
+    @Override
     public KhataReportResponse getKhataReport() {
-
         Long shopId = shopContext.getCurrentShopId();
+        List<PendingKhataResponse> pending = buildPendingKhataList(shopId);
+        return KhataReportResponse.builder()
+                .pendingKhata(pending)
+                .build();
+    }
 
-        List<PendingKhataResponse> pending = customerRepo.findByShopId(shopId)
+    private List<PendingKhataResponse> buildPendingKhataList(Long shopId) {
+        return customerRepo.findByShopId(shopId)
                 .stream()
                 .map(customer -> {
                     List<CustomerLedger> entries =
@@ -154,10 +161,6 @@ public class ReportServiceImpl implements IReportService {
                 })
                 .filter(x -> x != null)
                 .toList();
-
-        return KhataReportResponse.builder()
-                .pendingKhata(pending)
-                .build();
     }
 
     @Override
