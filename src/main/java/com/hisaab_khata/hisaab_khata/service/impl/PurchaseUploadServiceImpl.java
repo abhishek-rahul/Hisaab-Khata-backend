@@ -1,6 +1,5 @@
 package com.hisaab_khata.hisaab_khata.service.impl;
 
-import com.hisaab_khata.hisaab_khata.domain.Party;
 import com.hisaab_khata.hisaab_khata.domain.PurchaseUpload;
 import com.hisaab_khata.hisaab_khata.domain.PurchaseUploadLine;
 import com.hisaab_khata.hisaab_khata.domain.Shop;
@@ -40,6 +39,12 @@ public class PurchaseUploadServiceImpl implements IPurchaseUploadService {
     @Override
     @Transactional
     public ParsedInvoiceResponse upload(byte[] fileBytes, String originalFileName, Long supplierPartyId) {
+        return upload(fileBytes, originalFileName, supplierPartyId, null);
+    }
+
+    @Override
+    @Transactional
+    public ParsedInvoiceResponse upload(byte[] fileBytes, String originalFileName, Long supplierPartyId, String scenario) {
         Long shopId = shopContext.getCurrentShopId();
         if (supplierPartyId != null) {
             partyRepository.findByShopIdAndId(shopId, supplierPartyId)
@@ -47,7 +52,12 @@ public class PurchaseUploadServiceImpl implements IPurchaseUploadService {
                             "Supplier party not found", "SUPPLIER_NOT_FOUND"));
         }
 
-        ParsedInvoice parsed = invoiceParser.parse(fileBytes);
+        ParsedInvoice parsed;
+        if (scenario != null && invoiceParser instanceof com.hisaab_khata.hisaab_khata.parser.MockInvoiceParser) {
+            parsed = ((com.hisaab_khata.hisaab_khata.parser.MockInvoiceParser) invoiceParser).parseWithScenario(fileBytes, scenario);
+        } else {
+            parsed = invoiceParser.parse(fileBytes);
+        }
         Shop shop = shopRepository.getReferenceById(shopId);
 
         PurchaseUpload upload = PurchaseUpload.builder()
