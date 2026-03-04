@@ -1,0 +1,65 @@
+{
+  "case0": {
+    "docKind": "PDF",
+    "lines": [
+      { "lineNo": 1, "rawName": "Basmati Rice 5 Kg", "quantity": 10, "unit": "PCS", "unitPrice": 450.00 },
+      { "lineNo": 2, "rawName": "Refined Oil 1 Ltr", "quantity": 20, "unit": "PCS", "unitPrice": 180.50 },
+      { "lineNo": 3, "rawName": "Sugar 1 Kg", "quantity": 50, "unit": "PCS", "unitPrice": 48.00 }
+    ]
+  },
+
+  "case1_first_time": {
+    "docKind": "PDF",
+    "lines": [
+      { "lineNo": 1, "rawName": "Basmati Rice 5 Kg", "quantity": 10, "unit": "PCS", "unitPrice": 450.00 },
+      { "lineNo": 2, "rawName": "Refined Oil 1 Ltr", "quantity": 20, "unit": "PCS", "unitPrice": 180.50 },
+      { "lineNo": 3, "rawName": "Sugar 1 Kg", "quantity": 50, "unit": "PCS", "unitPrice": 48.00 }
+    ]
+  },
+
+  "case2_same_items": {
+    "docKind": "PDF",
+    "lines": [
+      { "lineNo": 1, "rawName": "Basmati Rice 5 Kg", "quantity": 5, "unit": "PCS", "unitPrice": 455.00 },
+      { "lineNo": 2, "rawName": "Refined Oil 1 Ltr", "quantity": 10, "unit": "PCS", "unitPrice": 179.00 },
+      { "lineNo": 3, "rawName": "Sugar 1 Kg", "quantity": 30, "unit": "PCS", "unitPrice": 49.00 }
+    ]
+  },
+
+  "case3_name_variation": {
+    "docKind": "PDF",
+    "lines": [
+      { "lineNo": 1, "rawName": "Basmati Rice 5kg", "quantity": 10, "unit": "PCS", "unitPrice": 450.00 },
+      { "lineNo": 2, "rawName": "Refined Oil 1 Litre", "quantity": 20, "unit": "PCS", "unitPrice": 180.50 },
+      { "lineNo": 3, "rawName": "SUGAR 1 KG", "quantity": 50, "unit": "PCS", "unitPrice": 48.00 }
+    ]
+  },
+
+  "case4_partial_overlap": {
+    "docKind": "PDF",
+    "lines": [
+      { "lineNo": 1, "rawName": "Basmati Rice 5 Kg", "quantity": 8, "unit": "PCS", "unitPrice": 452.00 },
+      { "lineNo": 2, "rawName": "Sugar 1 Kg", "quantity": 15, "unit": "PCS", "unitPrice": 48.50 },
+      { "lineNo": 3, "rawName": "Tea 500 gm", "quantity": 12, "unit": "PCS", "unitPrice": 210.00 }
+    ]
+  },
+
+  "case5_duplicate": {
+    "docKind": "PDF",
+    "lines": [
+      { "lineNo": 1, "rawName": "Sugar 1 Kg", "quantity": 10, "unit": "PCS", "unitPrice": 48.00 },
+      { "lineNo": 2, "rawName": "Sugar 1 Kg", "quantity": 20, "unit": "PCS", "unitPrice": 48.00 },
+      { "lineNo": 3, "rawName": "Sugar 1 Kg", "quantity": 5, "unit": "PCS", "unitPrice": 48.00 }
+    ]
+  },
+
+  "case6_invalid": {
+    "docKind": "PDF",
+    "lines": [
+      { "lineNo": 1, "rawName": "Sugar 1 Kg", "quantity": 0, "unit": "PCS", "unitPrice": 48.00 },
+      { "lineNo": 2, "rawName": "Tea 500 gm", "quantity": -5, "unit": "PCS", "unitPrice": 210.00 },
+      { "lineNo": 3, "rawName": "Salt 1 Kg", "quantity": 10, "unit": "PCS", "unitPrice": -1.00 }
+    ]
+  }
+}
+

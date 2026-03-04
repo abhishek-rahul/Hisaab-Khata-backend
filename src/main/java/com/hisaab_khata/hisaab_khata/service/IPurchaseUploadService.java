@@ -6,5 +6,7 @@ public interface IPurchaseUploadService {
 
     ParsedInvoiceResponse upload(byte[] fileBytes, String originalFileName, Long supplierPartyId);
 
+    ParsedInvoiceResponse upload(byte[] fileBytes, String originalFileName, Long supplierPartyId, String scenario);
+
     ParsedInvoiceResponse getByUploadId(Long uploadId);
 }

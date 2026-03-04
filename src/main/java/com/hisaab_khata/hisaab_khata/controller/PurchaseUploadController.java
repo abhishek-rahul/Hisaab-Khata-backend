@@ -23,7 +23,8 @@ public class PurchaseUploadController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<ParsedInvoiceResponse>> upload(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "supplierPartyId", required = false) Long supplierPartyId) {
+            @RequestParam(value = "supplierPartyId", required = false) Long supplierPartyId,
+            @RequestParam(value = "scenario", required = false) String scenario) {
         if (file == null || file.isEmpty()) {
             throw new BusinessValidationException("File is required", "MISSING_FILE");
         }
@@ -35,7 +36,7 @@ public class PurchaseUploadController {
             throw new BusinessValidationException("Failed to read file", "FILE_READ_ERROR");
         }
         ParsedInvoiceResponse response = purchaseUploadService.upload(
-                bytes, originalFileName, supplierPartyId);
+                bytes, originalFileName, supplierPartyId, scenario);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created("Upload parsed successfully", response));
     }
