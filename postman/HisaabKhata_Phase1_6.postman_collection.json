@@ -1,0 +1,1309 @@
+{
+	"info": {
+		"_postman_id": "hisaab-khata-phase1-6",
+		"name": "HisaabKhata Phase 1-6",
+		"description": "Production-ready collection for all Phase 1-6 endpoints. Request/response from controller DTOs. Runner order: Health → Auth → Me → Parties → Categories → Products → Stock → Purchase → Sales → Ledger → Reports.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{ "key": "token", "value": "{{accessToken}}", "type": "string" }
+		]
+	},
+	"variable": [
+		{ "key": "baseUrl", "value": "http://localhost:8080" }
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"exec": [
+					"var d = new Date();",
+					"var today = d.toISOString().slice(0, 10);",
+					"if (typeof pm.environment !== 'undefined') { pm.environment.set('today', today); }"
+				],
+				"type": "text/javascript"
+			}
+		}
+	],
+	"item": [
+		{
+			"name": "Health",
+			"item": [
+				{
+					"name": "GET /health - Liveness",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/health",
+						"description": "Liveness. Returns ApiResponse with data: { status: 'UP' }."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success and data', () => { pm.expect(j.success).to.be.true; pm.expect(j.data).to.have.property('status'); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "POST /auth/register - Register shop",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shopName\": \"Test Shop\",\n  \"ownerName\": \"Owner Name\",\n  \"mobile\": \"9876543210\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": "{{baseUrl}}/auth/register",
+						"description": "Register new shop. Request: RegisterRequest (shopName, ownerName, mobile, password). Response: ApiResponse + AuthResponse (shopId, userId, token, refreshToken)."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 201', () => pm.response.to.have.status(201));",
+									"const j = pm.response.json();",
+									"pm.test('Has success and data', () => { pm.expect(j.success).to.be.true; pm.expect(j.data).to.be.an('object'); });",
+									"if (j.data && j.data.token) { pm.environment.set('accessToken', j.data.token); }",
+									"if (j.data && j.data.refreshToken) { pm.environment.set('refreshToken', j.data.refreshToken); }",
+									"if (j.data && j.data.shopId) { pm.environment.set('shopId', j.data.shopId); }",
+									"if (j.data && j.data.userId) { pm.environment.set('ownerUserId', j.data.userId); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST /auth/login - Login",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"mobile\": \"9876543210\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": "{{baseUrl}}/auth/login",
+						"description": "Login. Request: LoginRequest (mobile, password). Response: ApiResponse + AuthResponse."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success and data', () => { pm.expect(j.success).to.be.true; pm.expect(j.data).to.be.an('object'); });",
+									"if (j.data && j.data.token) { pm.environment.set('accessToken', j.data.token); }",
+									"if (j.data && j.data.refreshToken) { pm.environment.set('refreshToken', j.data.refreshToken); }",
+									"if (j.data && j.data.shopId) { pm.environment.set('shopId', j.data.shopId); }",
+									"if (j.data && j.data.userId) { pm.environment.set('ownerUserId', j.data.userId); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST /auth/refresh - Refresh Token",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{refreshToken}}", "type": "string" } ] },
+						"method": "POST",
+						"header": [],
+						"url": "{{baseUrl}}/auth/refresh",
+						"description": "Refresh access token. No body. Header: Authorization: Bearer {{refreshToken}}. Response: ApiResponse + AuthResponse (new token, refreshToken)."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success and data', () => { pm.expect(j.success).to.be.true; pm.expect(j.data).to.be.an('object'); });",
+									"if (j.data && j.data.token) { pm.environment.set('accessToken', j.data.token); }",
+									"if (j.data && j.data.refreshToken) { pm.environment.set('refreshToken', j.data.refreshToken); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Me",
+			"item": [
+				{
+					"name": "GET /me - Current user",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/me",
+						"description": "Current user/shop. Returns ApiResponse + MeResponse (id, shopId, name, mobile, role, active)."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success and data', () => { pm.expect(j.success).to.be.true; pm.expect(j.data).to.have.property('shopId'); });",
+									"if (j.data && j.data.shopId) { pm.environment.set('shopId', j.data.shopId); }",
+									"if (j.data && j.data.id) { pm.environment.set('ownerUserId', j.data.id); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Shops / Staff",
+			"item": [
+				{
+					"name": "POST /shops/{shopId}/staff - Create staff",
+					"request": {
+						"method": "POST",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Staff One\",\n  \"mobile\": \"9876543211\",\n  \"password\": \"staffpass123\"\n}"
+						},
+						"url": "{{baseUrl}}/shops/{{shopId}}/staff",
+						"description": "Owner creates staff (OWNER only). StaffCreateRequest: name, mobile, password. Optional."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 2xx', () => pm.expect(pm.response.code).to.be.within(200, 299));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Parties",
+			"item": [
+				{
+					"name": "POST /parties - Create customer",
+					"request": {
+						"method": "POST",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Customer One\",\n  \"phone\": \"1111111111\",\n  \"type\": \"CUSTOMER\"\n}"
+						},
+						"url": "{{baseUrl}}/parties",
+						"description": "Create party. CreatePartyRequest: name, phone?, type (CUSTOMER | SUPPLIER). Saves to party table."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 2xx', () => pm.expect(pm.response.code).to.be.within(200, 299));",
+									"const j = pm.response.json();",
+									"pm.test('Has success and data', () => { pm.expect(j.success).to.be.true; pm.expect(j.data).to.be.an('object'); });",
+									"if (j.data && j.data.id && j.data.type === 'CUSTOMER') { pm.environment.set('partyCustomerId', j.data.id); pm.environment.set('ledgerPartyId', j.data.id); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST /parties - Create supplier",
+					"request": {
+						"method": "POST",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Supplier One\",\n  \"phone\": \"2222222222\",\n  \"type\": \"SUPPLIER\"\n}"
+						},
+						"url": "{{baseUrl}}/parties",
+						"description": "Create supplier party. Same DTO, type: SUPPLIER."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 2xx', () => pm.expect(pm.response.code).to.be.within(200, 299));",
+									"const j = pm.response.json();",
+									"if (j.data && j.data.id && j.data.type === 'SUPPLIER') { pm.environment.set('partySupplierId', j.data.id); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /parties - List parties",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/parties",
+						"description": "List parties. Query: type (optional). ApiResponse + List<PartyResponse>."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /parties/{partyId} - Get party",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/parties/{{partyCustomerId}}",
+						"description": "Get party by id. ApiResponse + PartyResponse."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has data', () => pm.expect(j.data).to.be.an('object'));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /parties/{partyId}/ledger - Party ledger",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/parties/{{ledgerPartyId}}/ledger",
+						"description": "Party ledger entries and balance. Optional."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "POST /categories - Create category",
+					"request": {
+						"method": "POST",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Groceries\"\n}"
+						},
+						"url": "{{baseUrl}}/categories",
+						"description": "Create category. CategoryCreateRequest: name. Response: ApiResponse + CategoryResponse (id, name, scope)."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 2xx', () => pm.expect(pm.response.code).to.be.within(200, 299));",
+									"const j = pm.response.json();",
+									"pm.test('Has success and data', () => { pm.expect(j.success).to.be.true; pm.expect(j.data).to.be.an('object'); });",
+									"if (j.data && j.data.id) { pm.environment.set('categoryId', j.data.id); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /categories - List categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/categories",
+						"description": "List categories. ApiResponse + List<CategoryResponse>."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "POST /products/manual - Create manual product",
+					"request": {
+						"method": "POST",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"canonicalName\": \"Rice 1kg\",\n  \"normalizedName\": \"rice 1kg\",\n  \"baseUnit\": \"PCS\",\n  \"categoryId\": null,\n  \"displayName\": \"Rice 1kg\",\n  \"displayUnit\": \"PCS\",\n  \"conversionToBase\": 1,\n  \"sellingPrice\": 80,\n  \"minStockInBase\": 10\n}"
+						},
+						"url": "{{baseUrl}}/products/manual",
+						"description": "Create product manually. CreateManualProductRequest: canonicalName, normalizedName, baseUnit (PCS|GRAM|ML), categoryId?, displayName, displayUnit, conversionToBase, sellingPrice?, minStockInBase?."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 2xx', () => pm.expect(pm.response.code).to.be.within(200, 299));",
+									"const j = pm.response.json();",
+									"pm.test('Has success and data', () => { pm.expect(j.success).to.be.true; pm.expect(j.data).to.be.an('object'); });",
+									"if (j.data && j.data.id) { pm.environment.set('shopProductId', j.data.id); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /products - List products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/products",
+						"description": "List shop products. ApiResponse + List<ShopProductResponse>."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);",
+									"if (j.data && Array.isArray(j.data) && j.data[0] && j.data[0].id) { pm.environment.set('shopProductId', j.data[0].id); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "PATCH /products/{shopProductId} - Update product",
+					"request": {
+						"method": "PATCH",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sellingPrice\": 85,\n  \"minStockInBase\": 15,\n  \"isActive\": true\n}"
+						},
+						"url": "{{baseUrl}}/products/{{shopProductId}}",
+						"description": "Patch product. PatchShopProductRequest: sellingPrice?, minStockInBase?, isActive?."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Stock",
+			"item": [
+				{
+					"name": "GET /stock - List stock",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/stock",
+						"description": "List all stock. ApiResponse + List<StockResponse>."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /stock/{shopProductId} - Stock by product",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/stock/{{shopProductId}}",
+						"description": "Stock for one product. ApiResponse + StockResponse."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Purchase",
+			"item": [
+				{
+					"name": "POST /purchase/upload - Upload invoice (form-data)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "file", "type": "file", "src": [], "description": "Attach a PDF or file (see README)" }
+							]
+						},
+						"url": "{{baseUrl}}/purchase/upload",
+						"description": "Upload invoice file. form-data key: file. Response: ApiResponse + ParsedInvoiceResponse (uploadId, lines, docKind, parserKey)."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 2xx', () => pm.expect(pm.response.code).to.be.within(200, 299));",
+									"const j = pm.response.json();",
+									"pm.test('Has success and data', () => { pm.expect(j.success).to.be.true; pm.expect(j.data).to.be.an('object'); });",
+									"if (j.data && j.data.uploadId) { pm.environment.set('purchaseUploadId', j.data.uploadId); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /purchase/upload/{uploadId} - Get upload",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/purchase/upload/{{purchaseUploadId}}",
+						"description": "Get parsed upload by uploadId. ApiResponse + ParsedInvoiceResponse."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST /purchase/drafts - Create draft from upload",
+					"request": {
+						"method": "POST",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"uploadId\": {{purchaseUploadId}},\n  \"supplierPartyId\": {{partySupplierId}},\n  \"invoiceNo\": \"INV-001\",\n  \"invoiceDate\": \"2026-03-03\",\n  \"notes\": \"Test draft\"\n}"
+						},
+						"url": "{{baseUrl}}/purchase/drafts",
+						"description": "Create draft from upload. CreateDraftRequest: uploadId, supplierPartyId?, invoiceNo?, invoiceDate?, notes?."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 2xx', () => pm.expect(pm.response.code).to.be.within(200, 299));",
+									"const j = pm.response.json();",
+									"pm.test('Has success and data', () => { pm.expect(j.success).to.be.true; pm.expect(j.data).to.be.an('object'); });",
+									"if (j.data && j.data.draftId) { pm.environment.set('purchaseDraftId', j.data.draftId); }",
+									"if (j.data && j.data.id) { pm.environment.set('purchaseDraftId', j.data.id); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /purchase/drafts/{draftId} - Get draft",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/purchase/drafts/{{purchaseDraftId}}",
+						"description": "Get draft by id. ApiResponse + DraftResponse."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);",
+									"if (j.data && j.data.lines && j.data.lines[0] && j.data.lines[0].lineId) { pm.environment.set('purchaseLineId', j.data.lines[0].lineId); }",
+									"if (j.data && j.data.lines && j.data.lines[0] && j.data.lines[0].id) { pm.environment.set('purchaseLineId', j.data.lines[0].id); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "PUT /purchase/drafts/{draftId} - Save draft",
+					"request": {
+						"method": "PUT",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"version\": 1,\n  \"supplierPartyId\": {{partySupplierId}},\n  \"invoiceNo\": \"INV-001\",\n  \"invoiceDate\": \"2026-03-03\",\n  \"notes\": \"Saved\",\n  \"lines\": null\n}"
+						},
+						"url": "{{baseUrl}}/purchase/drafts/{{purchaseDraftId}}",
+						"description": "Save draft. SaveDraftRequest: version, supplierPartyId?, invoiceNo?, invoiceDate?, notes?, lines?."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST /purchase/drafts/{draftId}/resolve/auto - Resolve auto",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": "{{baseUrl}}/purchase/drafts/{{purchaseDraftId}}/resolve/auto",
+						"description": "Auto-resolve draft lines. No body. ApiResponse + DraftReviewResponse (lines, needsReview, readyToPost)."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);",
+									"if (j.data && j.data.lines && j.data.lines[0]) { const line = j.data.lines[0]; pm.environment.set('purchaseLineId', line.lineId || line.id || line.lineNo); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /purchase/drafts/{draftId}/review - Get review",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/purchase/drafts/{{purchaseDraftId}}/review",
+						"description": "Get draft review state. ApiResponse + DraftReviewResponse."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "PUT /purchase/drafts/{draftId}/lines/{lineId}/resolve - Resolve line",
+					"request": {
+						"method": "PUT",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"action\": \"ACCEPT_SUGGESTION\",\n  \"shopProductId\": null,\n  \"canonicalName\": null,\n  \"baseUnit\": null,\n  \"categoryId\": null\n}"
+						},
+						"url": "{{baseUrl}}/purchase/drafts/{{purchaseDraftId}}/lines/{{purchaseLineId}}/resolve",
+						"description": "Resolve one line. ResolveLineRequest: action (ACCEPT_SUGGESTION | CHOOSE_EXISTING | CREATE_NEW_PRODUCT), shopProductId?, canonicalName?, baseUnit?, categoryId?."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST /purchase/drafts/{draftId}/post - Post draft",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": "{{baseUrl}}/purchase/drafts/{{purchaseDraftId}}/post",
+						"description": "Post draft to final purchase. No body. ApiResponse + PostedInvoiceSummary (draftId, status, postedAt, totalAmount, supplierPartyId, invoiceNo)."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 2xx', () => pm.expect(pm.response.code).to.be.within(200, 299));",
+									"const j = pm.response.json();",
+									"pm.test('Has success and data', () => { pm.expect(j.success).to.be.true; pm.expect(j.data).to.be.an('object'); });",
+									"if (j.data && j.data.draftId) { pm.environment.set('purchaseId', j.data.draftId); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /purchase/{id} - Get purchase (posted)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/purchase/{{purchaseId}}",
+						"description": "Get posted purchase by id. SuccessResponse + PurchaseResponse (or list of lines)."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success or data', () => { pm.expect(j.success !== undefined ? j.success : j.data).to.be.ok; });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Purchase (Legacy)",
+			"item": [
+				{
+					"name": "POST /purchase (legacy) - Single product",
+					"request": {
+						"method": "POST",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": 1,\n  \"supplierId\": null,\n  \"quantity\": 10,\n  \"unit\": \"PCS\",\n  \"costPrice\": 50,\n  \"paymentMode\": \"CASH\"\n}"
+						},
+						"url": "{{baseUrl}}/purchase",
+						"description": "Legacy: single-product purchase. PurchaseCreateRequest. Deprecated; use upload→draft→post."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 2xx or 4xx', () => pm.expect(pm.response.code).to.be.within(200, 499));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /purchase (legacy) - List",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/purchase",
+						"description": "Legacy: list purchases. Deprecated."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "PUT /purchase/{id} (legacy) - Update supplier",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": "{{baseUrl}}/purchase/{{purchaseId}}?supplierId={{partySupplierId}}",
+						"description": "Legacy: update purchase supplier. Deprecated."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 2xx or 4xx', () => pm.expect(pm.response.code).to.be.within(200, 499));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Sales",
+			"item": [
+				{
+					"name": "POST /sales/draft - Create sales draft",
+					"request": {
+						"method": "POST",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shopId\": {{shopId}},\n  \"customerPartyId\": {{partyCustomerId}},\n  \"discountAmount\": 0,\n  \"cashPaidAmount\": 100,\n  \"upiPaidAmount\": 0,\n  \"items\": [\n    { \"shopProductId\": {{shopProductId}}, \"quantityInBase\": 2, \"unitPrice\": 80 }\n  ]\n}"
+						},
+						"url": "{{baseUrl}}/sales/draft",
+						"description": "Create sales draft. SalesDraftRequest: shopId, customerPartyId?, discountAmount, cashPaidAmount, upiPaidAmount, items: [{ shopProductId, quantityInBase, unitPrice }]. Walk-in: customerPartyId null."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 2xx', () => pm.expect(pm.response.code).to.be.within(200, 299));",
+									"const j = pm.response.json();",
+									"pm.test('Has success and data', () => { pm.expect(j.success).to.be.true; pm.expect(j.data).to.be.an('object'); });",
+									"if (j.data && (j.data.id || j.data.draftId)) { pm.environment.set('salesDraftId', j.data.id || j.data.draftId); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /sales/{id} - Get sale or draft",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/sales/{{salesDraftId}}",
+						"description": "Get sale/draft by id. ApiResponse + SalesDraftResponse or posted sale."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST /sales/{id}/post - Post sale",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": "{{baseUrl}}/sales/{{salesDraftId}}/post",
+						"description": "Post sales draft. No body. ApiResponse + PostedSaleResponse."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 2xx', () => pm.expect(pm.response.code).to.be.within(200, 299));",
+									"const j = pm.response.json();",
+									"pm.test('Has success and data', () => { pm.expect(j.success).to.be.true; pm.expect(j.data).to.be.an('object'); });",
+									"if (j.data && (j.data.id || j.data.saleId)) { pm.environment.set('saleId', j.data.id || j.data.saleId); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /sales - List sales",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/sales",
+						"description": "List sales. Query: from?, to? (date). Optional."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Ledger",
+			"item": [
+				{
+					"name": "GET /ledger/parties/{partyId}/statement - Statement",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ledger/parties/{{ledgerPartyId}}/statement?from=2026-01-01&to=2026-12-31&limit=50&offset=0",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "ledger", "parties", "{{ledgerPartyId}}", "statement" ],
+							"query": [
+								{ "key": "from", "value": "2026-01-01" },
+								{ "key": "to", "value": "2026-12-31" },
+								{ "key": "limit", "value": "50" },
+								{ "key": "offset", "value": "0" }
+							]
+						},
+						"description": "Ledger statement. Query: from, to (YYYY-MM-DD), limit=50, offset=0. SuccessResponse + LedgerStatementResponse (entries, balance)."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success and data', () => { pm.expect(j.success).to.be.true; pm.expect(j.data).to.be.an('object'); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /ledger/parties/{partyId}/balance - Balance",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/ledger/parties/{{ledgerPartyId}}/balance",
+						"description": "Party balance. SuccessResponse + LedgerBalanceResponse."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Reports",
+			"item": [
+				{
+					"name": "GET /report/daily - Daily report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/report/daily?date={{today}}",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "report", "daily" ],
+							"query": [ { "key": "date", "value": "{{today}}" } ]
+						},
+						"description": "Daily report. Query: date (YYYY-MM-DD). SuccessResponse + DailyReportResponse."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success and data', () => { pm.expect(j.success).to.be.true; pm.expect(j.data).to.be.an('object'); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /report/sales - Sales report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/report/sales?from=2026-01-01&to=2026-12-31",
+						"description": "Sales report. Query: from, to. Optional."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /report/stock - Stock report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/report/stock",
+						"description": "Stock report. Optional."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /report/khata - Khata report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/report/khata",
+						"description": "Khata report. Optional."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /report/range - Range report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/report/range?from=2026-01-01&to=2026-12-31",
+						"description": "Daily range report. Query: from, to. Optional."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /report/profit - Profit report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/report/profit?from=2026-01-01&to=2026-12-31",
+						"description": "Profit report. Query: from, to. Optional."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "GET /dashboard/today",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/dashboard/today",
+						"description": "Today summary. SuccessResponse + TodaySummaryResponse. Optional."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /dashboard/week",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/dashboard/week",
+						"description": "Week summary. Optional."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /dashboard/month",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/dashboard/month",
+						"description": "Month summary. Optional."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Khata",
+			"item": [
+				{
+					"name": "GET /khata/pending - Pending khata",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/khata/pending",
+						"description": "Pending customer balances. SuccessResponse + List<PendingKhataResponse>. Optional."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Search",
+			"item": [
+				{
+					"name": "GET /search - Search",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/search?q=rice",
+						"description": "Search. Query: q. SuccessResponse + List<SearchResultResponse>. Optional."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Closing",
+			"item": [
+				{
+					"name": "POST /closing - Post closing",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": "{{baseUrl}}/closing",
+						"description": "Daily closing. SuccessResponse + DailyClosingResponse. Optional."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 2xx', () => pm.expect(pm.response.code).to.be.within(200, 299));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /closing - List closings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/closing",
+						"description": "List daily closings. Optional."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test('Has success', () => pm.expect(j.success).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}
